@@ -28,7 +28,8 @@ colors = ["cyan", "magenta", "yellow", "white", "red", "green", "blue"]
 def animate():
     global running
     if running:
-        t.pencolor(colors[t.xcor() % len(colors)])  # Cambiar color del círculo
+        # Corregir el índice de color usando int() para convertir el valor a entero
+        t.pencolor(colors[int(t.xcor()) % len(colors)])  # Cambiar color del círculo
         t.circle(100)  # Dibujar círculo de radio 100
         t.left(10)  # Girar un poco para el próximo círculo
         t_screen.ontimer(animate, 100)  # Volver a ejecutar la animación en 100 ms
