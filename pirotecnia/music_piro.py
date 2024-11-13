@@ -12,7 +12,7 @@ window = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Simulación de Pirotecnia Musical")
 
 # Cargar música
-pygame.mixer.music.load("tu_musica.wav")
+pygame.mixer.music.load("pirotecnia/audio.mp3")
 pygame.mixer.music.play(-1)  # Repetir la música
 
 # Colores de fuegos artificiales
