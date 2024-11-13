@@ -1,6 +1,5 @@
 import pygame
 import random
-import time
 import math
 
 # Configuración inicial de Pygame
@@ -27,7 +26,39 @@ colors = [
     (255, 255, 255) # Blanco
 ]
 
-# Clase para crear partículas de fuegos artificiales
+# Clase para el proyectil inicial del fuego artificial
+class Firework:
+    def __init__(self):
+        self.x = random.randint(100, width - 100)
+        self.y = height
+        self.color = random.choice(colors)
+        self.speed_y = random.uniform(-5, -8)  # Velocidad de ascenso
+        self.exploded = False
+        self.explosion_height = random.randint(150, 300)  # Altura de la explosión
+        self.particles = []
+
+    def move(self):
+        if not self.exploded:
+            # Ascender hasta la altura de explosión
+            self.y += self.speed_y
+            pygame.draw.circle(window, self.color, (int(self.x), int(self.y)), 5)
+            # Explota al alcanzar la altura deseada
+            if self.y <= self.explosion_height:
+                self.exploded = True
+                self.create_particles()
+        else:
+            # Mover partículas después de la explosión
+            for particle in self.particles:
+                particle.move()
+            # Eliminar partículas que han terminado su vida
+            self.particles[:] = [p for p in self.particles if p.life > 0]
+
+    def create_particles(self):
+        # Crear partículas de explosión
+        for _ in range(50):  # Número de partículas
+            self.particles.append(Particle(self.x, self.y, self.color))
+
+# Clase para las partículas de la explosión
 class Particle:
     def __init__(self, x, y, color):
         self.x = x
@@ -46,20 +77,12 @@ class Particle:
         if self.life > 0:
             pygame.draw.circle(window, self.color, (int(self.x), int(self.y)), self.radius)
 
-# Función para crear una explosión de partículas
-def create_firework():
-    x = random.randint(100, width - 100)
-    y = random.randint(100, height - 300)
-    color = random.choice(colors)
-    particles = [Particle(x, y, color) for _ in range(50)]
-    return particles
-
-# Configuración de sincronización de explosiones
+# Configuración de sincronización de fuegos artificiales
 clock = pygame.time.Clock()
 beat_interval = 500  # Intervalo en milisegundos entre explosiones
 
-running = True
 fireworks = []
+running = True
 while running:
     window.fill((0, 0, 0))  # Limpiar la pantalla (color negro)
     
@@ -68,16 +91,16 @@ while running:
         if event.type == pygame.QUIT:
             running = False
     
-    # Crear una explosión en sincronización con el ritmo
+    # Crear fuegos artificiales en sincronización con el ritmo
     if pygame.mixer.music.get_pos() % beat_interval < 50:
-        fireworks.append(create_firework())
+        fireworks.append(Firework())
     
-    # Dibujar y actualizar partículas de cada explosión
+    # Mover y dibujar cada fuego artificial
     for firework in fireworks:
-        for particle in firework:
-            particle.move()
-        # Eliminar las partículas que han terminado su vida
-        firework[:] = [p for p in firework if p.life > 0]
+        firework.move()
+    
+    # Eliminar fuegos artificiales que ya han explotado y agotado todas sus partículas
+    fireworks[:] = [fw for fw in fireworks if fw.exploded is False or fw.particles]
 
     pygame.display.flip()
     clock.tick(60)
