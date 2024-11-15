@@ -107,5 +107,5 @@ t.goto(-300, 100)  # Ajustar la posición de inicio
 t.pendown()
 write_python()
 
-# Terminar animación
+# Terminar 
 turtle.done()
