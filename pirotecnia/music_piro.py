@@ -9,7 +9,7 @@ pygame.mixer.init()
 # Tamaño de la ventana
 width, height = 800, 600
 window = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Simulación de Pirotecnia Musical")
+pygame.display.set_caption("Simulación de Pirotecnia Musical - Figuras")
 
 # Cargar música
 pygame.mixer.music.load("audio.mp3")
@@ -32,10 +32,11 @@ class Firework:
         self.x = random.randint(100, width - 100)
         self.y = height
         self.color = random.choice(colors)
-        self.speed_y = random.uniform(-5, -8)  # Velocidad de ascenso
+        self.speed_y = random.uniform(-7, -10)  # Velocidad de ascenso
         self.exploded = False
         self.explosion_height = random.randint(150, 300)  # Altura de la explosión
         self.particles = []
+        self.shape = random.choice(["circle", "flower", "star"])  # Figura de explosión
 
     def move(self):
         if not self.exploded:
@@ -54,28 +55,56 @@ class Firework:
             self.particles[:] = [p for p in self.particles if p.life > 0]
 
     def create_particles(self):
-        # Crear partículas de explosión
-        for _ in range(50):  # Número de partículas
-            self.particles.append(Particle(self.x, self.y, self.color))
+        # Crear partículas dependiendo de la figura
+        if self.shape == "circle":
+            self.create_circle_particles()
+        elif self.shape == "flower":
+            self.create_flower_particles()
+        elif self.shape == "star":
+            self.create_star_particles()
+
+    def create_circle_particles(self):
+        for angle in range(0, 360, 10):  # Generar partículas en un círculo
+            radian = math.radians(angle)
+            self.particles.append(Particle(self.x, self.y, self.color, radian, speed=3))
+
+    def create_flower_particles(self):
+        for angle in range(0, 360, 15):  # Generar pétalos
+            radian = math.radians(angle)
+            for offset in (1, 2):  # Múltiples capas
+                self.particles.append(Particle(self.x, self.y, self.color, radian, speed=offset * 2))
+
+    def create_star_particles(self):
+        for angle in range(0, 360, 36):  # Picos de la estrella
+            radian = math.radians(angle)
+            self.particles.append(Particle(self.x, self.y, self.color, radian, speed=5))
+            self.particles.append(Particle(self.x, self.y, self.color, radian + math.radians(18), speed=3))
 
 # Clase para las partículas de la explosión
 class Particle:
-    def __init__(self, x, y, color):
+    def __init__(self, x, y, color, angle, speed):
         self.x = x
         self.y = y
         self.color = color
-        self.radius = random.randint(2, 5)
-        self.speed = random.uniform(1, 4)
-        self.angle = random.uniform(0, 2 * math.pi)
+        self.radius = random.randint(2, 4)
+        self.speed = speed
+        self.angle = angle
         self.life = 100  # Duración de la partícula
+        self.fade = 255  # Valor inicial para el desvanecimiento
 
     def move(self):
         # Movimiento de la partícula
         self.x += math.cos(self.angle) * self.speed
         self.y += math.sin(self.angle) * self.speed + 0.1  # Gravedad ligera
         self.life -= 1
+        self.fade = max(0, self.fade - 3)  # Reducir el valor de desvanecimiento
         if self.life > 0:
-            pygame.draw.circle(window, self.color, (int(self.x), int(self.y)), self.radius)
+            faded_color = (
+                max(0, self.color[0] * self.fade // 255),
+                max(0, self.color[1] * self.fade // 255),
+                max(0, self.color[2] * self.fade // 255),
+            )
+            pygame.draw.circle(window, faded_color, (int(self.x), int(self.y)), self.radius)
 
 # Configuración de sincronización de fuegos artificiales
 clock = pygame.time.Clock()
