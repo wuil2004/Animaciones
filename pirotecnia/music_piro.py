@@ -106,7 +106,7 @@ class Particle:
             )
             pygame.draw.circle(window, faded_color, (int(self.x), int(self.y)), self.radius)
 
-# Configuración de sincronización de fuegos artificiales
+# Configuración de sincronización de fuegos artificiale
 clock = pygame.time.Clock()
 beat_interval = 500  # Intervalo en milisegundos entre explosiones
 
