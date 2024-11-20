@@ -108,7 +108,7 @@ class Particle:
 
 # Configuración de sincronización de fuegos artificiales
 clock = pygame.time.Clock()
-beat_interval = 500  # Intervalo en milisegundos entre explosiones
+beat_interval = 500  # Intervalo en milisegundos entre explosione
 
 fireworks = []
 running = True
