@@ -27,8 +27,9 @@ colors = [
 ]
 
 # Tipos de figuras disponibles
-shapes = ["circle", "flower", "star", "heart", "panda"]
+shapes = ["circle", "flower", "star", "heart", "panda", "text"]
 current_shape = 0  # Índice para el tipo de figura actual
+custom_text = "HELLO"  # Texto predeterminado para explosiones
 
 # Clase para el proyectil inicial del fuego artificial
 class Firework:
@@ -70,6 +71,8 @@ class Firework:
             self.create_heart_particles()
         elif self.shape == "panda":
             self.create_panda_particles()
+        elif self.shape == "text":
+            self.create_text_particles(custom_text)
 
     def create_circle_particles(self):
         for angle in range(0, 360, 10):  # Generar partículas en un círculo
@@ -96,14 +99,32 @@ class Firework:
             self.particles.append(Particle(self.x + x_offset * 10, self.y + y_offset * 10, self.color, 0, speed=0))
 
     def create_panda_particles(self):
+        # Dibujar cara, ojos y orejas del panda
         # Cara principal
         self.particles.append(Particle(self.x, self.y, (255, 255, 255), 0, speed=0, radius=20))
         # Ojos
         self.particles.append(Particle(self.x - 10, self.y - 10, (0, 0, 0), 0, speed=0, radius=6))
         self.particles.append(Particle(self.x + 10, self.y - 10, (0, 0, 0), 0, speed=0, radius=6))
+        # Ojos blancos dentro de los negros
+        self.particles.append(Particle(self.x - 10, self.y - 10, (255, 255, 255), 0, speed=0, radius=3))
+        self.particles.append(Particle(self.x + 10, self.y - 10, (255, 255, 255), 0, speed=0, radius=3))
         # Orejas
         self.particles.append(Particle(self.x - 20, self.y - 20, (0, 0, 0), 0, speed=0, radius=10))
         self.particles.append(Particle(self.x + 20, self.y - 20, (0, 0, 0), 0, speed=0, radius=10))
+        # Boca
+        self.particles.append(Particle(self.x, self.y + 10, (0, 0, 0), 0, speed=0, radius=5))
+
+    def create_text_particles(self, text):
+        # Crear partículas para cada carácter en el texto
+        font = pygame.font.Font(None, 100)
+        text_surface = font.render(text, True, self.color)
+        text_width, text_height = text_surface.get_size()
+        text_x = self.x - text_width // 2
+        text_y = self.y - text_height // 2
+        for x in range(text_width):
+            for y in range(text_height):
+                if text_surface.get_at((x, y)).a > 0:  # Detectar píxeles visibles
+                    self.particles.append(Particle(text_x + x, text_y + y, self.color, 0, speed=0, radius=1))
 
 # Clase para las partículas de la explosión
 class Particle:
@@ -145,35 +166,8 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
-            # Cambiar figura con flechas izquierda y derecha
             if event.key == pygame.K_LEFT:
                 current_shape = (current_shape - 1) % len(shapes)
             elif event.key == pygame.K_RIGHT:
                 current_shape = (current_shape + 1) % len(shapes)
-            # Lanzar fuego artificial con barra espaciadora
-            elif event.key == pygame.K_SPACE:
-                fireworks.append(Firework(shapes[current_shape]))
-
-    # Lanzar fuegos artificiales automáticamente cada 1 segundo
-    auto_firework_timer += clock.get_time()
-    if auto_firework_timer > 1000:
-        auto_firework_timer = 0
-        fireworks.append(Firework(random.choice(shapes)))
-    
-    # Dibujar texto de figura seleccionada
-    font = pygame.font.Font(None, 36)
-    text = font.render(f"Figura: {shapes[current_shape].capitalize()}", True, (255, 255, 255))
-    window.blit(text, (10, 10))
-    
-    # Mover y dibujar cada fuego artificial
-    for firework in fireworks:
-        firework.move()
-    
-    # Eliminar fuegos artificiales que ya han explotado y agotado todas sus partículas
-    fireworks[:] = [fw for fw in fireworks if fw.exploded is False or fw.particles]
-
-    pygame.display.flip()
-    clock.tick(60)
-
-# Cerrar Pygame
-pygame.quit()
+            elif event.key == pygame
