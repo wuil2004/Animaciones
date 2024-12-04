@@ -26,9 +26,13 @@ colors = [
     (255, 255, 255) # Blanco
 ]
 
+# Tipos de figuras disponibles
+shapes = ["circle", "flower", "star"]
+current_shape = 0  # Índice para el tipo de figura actual
+
 # Clase para el proyectil inicial del fuego artificial
 class Firework:
-    def __init__(self):
+    def __init__(self, shape):
         self.x = random.randint(100, width - 100)
         self.y = height
         self.color = random.choice(colors)
@@ -36,7 +40,7 @@ class Firework:
         self.exploded = False
         self.explosion_height = random.randint(150, 300)  # Altura de la explosión
         self.particles = []
-        self.shape = random.choice(["circle", "flower", "star"])  # Figura de explosión
+        self.shape = shape  # Figura seleccionada
 
     def move(self):
         if not self.exploded:
@@ -108,21 +112,30 @@ class Particle:
 
 # Configuración de sincronización de fuegos artificiales
 clock = pygame.time.Clock()
-beat_interval = 500  # Intervalo en milisegundos entre explosiones
-
 fireworks = []
 running = True
+
 while running:
     window.fill((0, 0, 0))  # Limpiar la pantalla (color negro)
     
-    # Detectar eventos de salida
+    # Detectar eventos
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.KEYDOWN:
+            # Cambiar figura con flechas izquierda y derecha
+            if event.key == pygame.K_LEFT:
+                current_shape = (current_shape - 1) % len(shapes)
+            elif event.key == pygame.K_RIGHT:
+                current_shape = (current_shape + 1) % len(shapes)
+            # Lanzar fuego artificial con barra espaciadora
+            elif event.key == pygame.K_SPACE:
+                fireworks.append(Firework(shapes[current_shape]))
     
-    # Crear fuegos artificiales en sincronización con el ritmo
-    if pygame.mixer.music.get_pos() % beat_interval < 50:
-        fireworks.append(Firework())
+    # Dibujar texto de figura seleccionada
+    font = pygame.font.Font(None, 36)
+    text = font.render(f"Figura: {shapes[current_shape].capitalize()}", True, (255, 255, 255))
+    window.blit(text, (10, 10))
     
     # Mover y dibujar cada fuego artificial
     for firework in fireworks:
