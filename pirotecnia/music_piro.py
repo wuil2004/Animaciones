@@ -27,7 +27,7 @@ colors = [
 ]
 
 # Tipos de figuras disponibles
-shapes = ["circle", "flower", "star"]
+shapes = ["circle", "flower", "star", "heart", "panda"]
 current_shape = 0  # Índice para el tipo de figura actual
 
 # Clase para el proyectil inicial del fuego artificial
@@ -66,6 +66,10 @@ class Firework:
             self.create_flower_particles()
         elif self.shape == "star":
             self.create_star_particles()
+        elif self.shape == "heart":
+            self.create_heart_particles()
+        elif self.shape == "panda":
+            self.create_panda_particles()
 
     def create_circle_particles(self):
         for angle in range(0, 360, 10):  # Generar partículas en un círculo
@@ -84,13 +88,30 @@ class Firework:
             self.particles.append(Particle(self.x, self.y, self.color, radian, speed=5))
             self.particles.append(Particle(self.x, self.y, self.color, radian + math.radians(18), speed=3))
 
+    def create_heart_particles(self):
+        for t in range(0, 360, 5):  # Usar coordenadas polares para el corazón
+            radian = math.radians(t)
+            x_offset = 16 * math.sin(radian)**3
+            y_offset = -(13 * math.cos(radian) - 5 * math.cos(2 * radian) - 2 * math.cos(3 * radian) - math.cos(4 * radian))
+            self.particles.append(Particle(self.x + x_offset * 10, self.y + y_offset * 10, self.color, 0, speed=0))
+
+    def create_panda_particles(self):
+        # Cara principal
+        self.particles.append(Particle(self.x, self.y, (255, 255, 255), 0, speed=0, radius=20))
+        # Ojos
+        self.particles.append(Particle(self.x - 10, self.y - 10, (0, 0, 0), 0, speed=0, radius=6))
+        self.particles.append(Particle(self.x + 10, self.y - 10, (0, 0, 0), 0, speed=0, radius=6))
+        # Orejas
+        self.particles.append(Particle(self.x - 20, self.y - 20, (0, 0, 0), 0, speed=0, radius=10))
+        self.particles.append(Particle(self.x + 20, self.y - 20, (0, 0, 0), 0, speed=0, radius=10))
+
 # Clase para las partículas de la explosión
 class Particle:
-    def __init__(self, x, y, color, angle, speed):
+    def __init__(self, x, y, color, angle, speed, radius=None):
         self.x = x
         self.y = y
         self.color = color
-        self.radius = random.randint(2, 4)
+        self.radius = radius if radius else random.randint(2, 4)
         self.speed = speed
         self.angle = angle
         self.life = 100  # Duración de la partícula
@@ -113,6 +134,7 @@ class Particle:
 # Configuración de sincronización de fuegos artificiales
 clock = pygame.time.Clock()
 fireworks = []
+auto_firework_timer = 0
 running = True
 
 while running:
@@ -131,6 +153,12 @@ while running:
             # Lanzar fuego artificial con barra espaciadora
             elif event.key == pygame.K_SPACE:
                 fireworks.append(Firework(shapes[current_shape]))
+
+    # Lanzar fuegos artificiales automáticamente cada 1 segundo
+    auto_firework_timer += clock.get_time()
+    if auto_firework_timer > 1000:
+        auto_firework_timer = 0
+        fireworks.append(Firework(random.choice(shapes)))
     
     # Dibujar texto de figura seleccionada
     font = pygame.font.Font(None, 36)
